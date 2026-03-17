@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find e:/Isa/Projects/BUN/investment-tracker -maxdepth 1 -type f -name .*)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest add form --yes)",
+      "Bash(node -e \"require\\(''@radix-ui/react-label''\\); require\\(''@radix-ui/react-slot''\\); console.log\\(''OK''\\)\")",
+      "Bash(node -e \"const {randomBytes} = require\\(''crypto''\\); console.log\\(randomBytes\\(32\\).toString\\(''hex''\\)\\)\")",
+      "Bash(npx better-auth:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(node -e \"const p = require\\(''./node_modules/better-auth/package.json''\\); console.log\\(p.version, Object.keys\\(p.bin || {}\\)\\)\")",
+      "Bash(npx @better-auth/cli@latest migrate)",
+      "Bash(npx @better-auth/cli@latest generate --output ./schema.sql)",
+      "Bash(DB_HOST=localhost DB_NAME=bun_investment_tracker_db DB_USER=root DB_PASSWORD=\"\" npx drizzle-kit push)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(node --input-type=module:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}

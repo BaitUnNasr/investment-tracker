@@ -14,7 +14,11 @@
       "Bash(DB_HOST=localhost DB_NAME=bun_investment_tracker_db DB_USER=root DB_PASSWORD=\"\" npx drizzle-kit push)",
       "Bash(npx drizzle-kit:*)",
       "Bash(node --input-type=module:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(ls -d /e/Isa/Projects/BUN/investment-tracker/*/)",
+      "Bash(node -e \":*)",
+      "Bash(npx shadcn@latest add collapsible --yes)",
+      "Bash(node -e \"console.log\\(require\\(''./node_modules/nextjs-toploader/package.json''\\).version\\)\")"
     ]
   }
 }

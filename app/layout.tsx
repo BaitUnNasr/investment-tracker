@@ -2,6 +2,7 @@ import { Geist_Mono, Inter, Open_Sans } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import NextTopLoader from "nextjs-toploader"
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-heading' })
@@ -24,6 +25,7 @@ export default function RootLayout({
       className={cn("antialiased", inter.variable, openSans.variable)}
     >
       <body>
+        <NextTopLoader color="#a78bfb" height={3} showSpinner={false} shadow={false} />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

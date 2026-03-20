@@ -157,8 +157,7 @@ export function UploadTransactionsBtn() {
 
       <Dialog
         open={open}
-        onOpenChange={(v, details) => {
-          if (!v && (details?.reason === "outside-press" || details?.reason === "escape-key")) return
+        onOpenChange={(v) => {
           setOpen(v)
           if (!v) reset()
         }}

@@ -303,10 +303,10 @@ export function ClientsTable({
 
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger
-                        render={<Button variant="ghost" size="icon" className="size-8" aria-label="More actions" />}
-                      >
-                        <MoreHorizontalIcon className="size-4" />
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="size-8" aria-label="More actions">
+                          <MoreHorizontalIcon className="size-4" />
+                        </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setEditingClient(client)}>

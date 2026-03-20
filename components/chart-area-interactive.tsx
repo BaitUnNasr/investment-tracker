@@ -176,10 +176,10 @@ export function ChartAreaInteractive() {
         </CardDescription>
         <CardAction>
           <ToggleGroup
-            multiple={false}
-            value={timeRange ? [timeRange] : []}
+            type="single"
+            value={timeRange ?? ""}
             onValueChange={(value) => {
-              setTimeRange(value[0] ?? "90d")
+              if (value) setTimeRange(value)
             }}
             variant="outline"
             className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"

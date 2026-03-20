@@ -1,5 +1,5 @@
 import { SiteHeader } from "@/components/site-header"
-import { Button } from "@/components/ui/button"
+import { UploadNavBtn } from "@/components/upload-nav-btn"
 import {
   Card,
   CardContent,
@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { UploadIcon } from "lucide-react"
 
 // Placeholder NAV data — replace with DB query
 // Source: Historic_NAV_since_inception_to_7-Feb-2026 files
@@ -79,10 +78,7 @@ export default function NavDataPage() {
               Upload and view daily NAV for Tata Ethical Fund and Tata Gold Fund
             </p>
           </div>
-          <Button>
-            <UploadIcon className="mr-2 size-4" />
-            Upload NAV (Excel / CSV)
-          </Button>
+          <UploadNavBtn />
         </div>
 
         {/* Latest NAV summary cards */}

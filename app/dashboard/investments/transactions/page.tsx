@@ -14,9 +14,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { UploadIcon, SearchIcon } from "lucide-react"
+import { SearchIcon } from "lucide-react"
+import { UploadTransactionsBtn } from "@/components/upload-transactions-btn"
 
 const transactions = [
   { date: "26/01/2026", transId: "1101939", type: "TRF", rcVc: "4496", account: "075-001", client: "Sarah M. Kazi", amount: 500, direction: "credit", installment: 26 },
@@ -43,10 +43,7 @@ export default function TransactionsPage() {
               All credit and debit entries across investment accounts
             </p>
           </div>
-          <Button>
-            <UploadIcon className="mr-2 size-4" />
-            Import CSV
-          </Button>
+          <UploadTransactionsBtn />
         </div>
 
         <div className="flex items-center gap-2">

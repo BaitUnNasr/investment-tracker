@@ -14,7 +14,21 @@
       "Bash(DB_HOST=localhost DB_NAME=bun_investment_tracker_db DB_USER=root DB_PASSWORD=\"\" npx drizzle-kit push)",
       "Bash(npx drizzle-kit:*)",
       "Bash(node --input-type=module:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(ls -d /e/Isa/Projects/BUN/investment-tracker/*/)",
+      "Bash(node -e \":*)",
+      "Bash(npx shadcn@latest add collapsible --yes)",
+      "Bash(node -e \"console.log\\(require\\(''./node_modules/nextjs-toploader/package.json''\\).version\\)\")",
+      "Bash(npx shadcn@latest add dialog --yes)",
+      "Bash(node -e \"const d = require\\(''''./node_modules/@base-ui/react/dist/dialog.js''''\\); console.log\\(Object.keys\\(d\\)\\)\")",
+      "Bash(grep -r \"dismissible\\\\|outside-press\\\\|OpenChangeReason\" e:/Isa/Projects/BUN/investment-tracker/node_modules/@base-ui/react/typings --include=*.d.ts -l)",
+      "Bash(grep -r \"dismissible\\\\|OpenChangeReason\\\\|outside-press\" e:/Isa/Projects/BUN/investment-tracker/node_modules/@base-ui/react --include=*.d.ts -m 5)",
+      "Bash(npx tsc:*)",
+      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\(''''version:'''', p[''''version'''']\\); print\\(''''peer:'''', json.dumps\\(p.get\\(''''peerDependencies'''', {}\\), indent=2\\)\\)\")",
+      "Bash(node -e \"const p=require\\(''./node_modules/@hookform/resolvers/package.json''\\); console.log\\(''version:'', p.version\\); console.log\\(''peerDeps:'', JSON.stringify\\(p.peerDependencies\\)\\)\")",
+      "Bash(npx shadcn@latest add switch --yes)",
+      "Bash(bun add:*)",
+      "Bash(bun remove:*)"
     ]
   }
 }

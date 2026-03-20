@@ -2,6 +2,7 @@ import { Geist_Mono, Inter, Open_Sans } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import NextTopLoader from "nextjs-toploader"
 import { cn } from "@/lib/utils";
 
@@ -26,7 +27,11 @@ export default function RootLayout({
     >
       <body>
         <NextTopLoader color="#a78bfb" height={3} showSpinner={false} shadow={false} />
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

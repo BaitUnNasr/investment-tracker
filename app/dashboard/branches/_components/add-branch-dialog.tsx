@@ -66,8 +66,7 @@ export function AddBranchDialog() {
 
       <Dialog
         open={open}
-        onOpenChange={(v, details) => {
-          if (!v && details?.reason === "outside-press") return
+        onOpenChange={(v) => {
           setOpen(v)
           if (!v) form.reset()
         }}

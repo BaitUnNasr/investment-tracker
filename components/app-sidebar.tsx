@@ -116,11 +116,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
+              asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
-              render={<Link href="/dashboard" />}
             >
-              <CoinsIcon className="size-5! text-primary" />
-              <span className="text-base font-semibold">BUN Admin</span>
+              <Link href="/dashboard">
+                <CoinsIcon className="size-5! text-primary" />
+                <span className="text-base font-semibold">BUN Admin</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -134,12 +136,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
+                    asChild
                     tooltip={item.title}
                     isActive={pathname === item.url}
-                    render={<Link href={item.url} />}
                   >
-                    {item.icon}
-                    <span>{item.title}</span>
+                    <Link href={item.url}>
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -162,22 +166,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className="group/collapsible"
                 >
                   <SidebarMenuItem>
-                    <CollapsibleTrigger
-                      render={<SidebarMenuButton tooltip={section.title} />}
-                    >
-                      {section.icon}
-                      <span>{section.title}</span>
-                      <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={section.title}>
+                        {section.icon}
+                        <span>{section.title}</span>
+                        <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {section.items.map((item) => (
                           <SidebarMenuSubItem key={item.title}>
                             <SidebarMenuSubButton
+                              asChild
                               isActive={pathname === item.url}
-                              render={<Link href={item.url} />}
                             >
-                              <span>{item.title}</span>
+                              <Link href={item.url}>
+                                <span>{item.title}</span>
+                              </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -31,6 +30,7 @@ import {
 } from "@/components/ui/select"
 import { PlusIcon } from "lucide-react"
 import { toast } from "sonner"
+import { createClient } from "@/app/dashboard/clients/actions"
 
 const SCHEME_LABELS: Record<string, string> = {
   RTD:  "RTD — Recurring Term Deposit",
@@ -61,7 +61,6 @@ interface Branch { id: string; code: string; name: string }
 
 export function AddClientDialog({ branches }: { branches: Branch[] }) {
   const [open, setOpen] = useState(false)
-  const router = useRouter()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -78,21 +77,14 @@ export function AddClientDialog({ branches }: { branches: Branch[] }) {
   const selectedBranch    = branches.find((b) => b.id === selectedBranchId)
 
   async function onSubmit(values: FormValues) {
-    try {
-      const res = await fetch("/api/clients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? "Failed to create client")
-      toast.success(`Client "${values.firstName} ${values.lastName}" created`)
-      form.reset()
-      setOpen(false)
-      router.refresh()
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong")
+    const result = await createClient(values)
+    if ("error" in result) {
+      toast.error(result.error)
+      return
     }
+    toast.success(`Client "${values.firstName} ${values.lastName}" created`)
+    form.reset()
+    setOpen(false)
   }
 
   function handleClose() {

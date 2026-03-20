@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -25,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { PlusIcon } from "lucide-react"
 import { toast } from "sonner"
+import { createBranch } from "@/app/dashboard/branches/actions"
 
 const schema = z.object({
   code:    z.string().min(1, "Branch code is required").max(20),
@@ -38,7 +38,6 @@ type FormValues = z.infer<typeof schema>
 
 export function AddBranchDialog() {
   const [open, setOpen] = useState(false)
-  const router = useRouter()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -48,21 +47,14 @@ export function AddBranchDialog() {
   const isSubmitting = form.formState.isSubmitting
 
   async function onSubmit(values: FormValues) {
-    try {
-      const res = await fetch("/api/branches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? "Failed to create branch")
-      toast.success(`Branch "${values.name}" created`)
-      form.reset()
-      setOpen(false)
-      router.refresh()
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong")
+    const result = await createBranch(values)
+    if ("error" in result) {
+      toast.error(result.error)
+      return
     }
+    toast.success(`Branch "${values.name}" created`)
+    form.reset()
+    setOpen(false)
   }
 
   return (

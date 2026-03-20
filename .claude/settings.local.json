@@ -25,7 +25,8 @@
       "Bash(grep -r \"dismissible\\\\|OpenChangeReason\\\\|outside-press\" e:/Isa/Projects/BUN/investment-tracker/node_modules/@base-ui/react --include=*.d.ts -m 5)",
       "Bash(npx tsc:*)",
       "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\(''''version:'''', p[''''version'''']\\); print\\(''''peer:'''', json.dumps\\(p.get\\(''''peerDependencies'''', {}\\), indent=2\\)\\)\")",
-      "Bash(node -e \"const p=require\\(''./node_modules/@hookform/resolvers/package.json''\\); console.log\\(''version:'', p.version\\); console.log\\(''peerDeps:'', JSON.stringify\\(p.peerDependencies\\)\\)\")"
+      "Bash(node -e \"const p=require\\(''./node_modules/@hookform/resolvers/package.json''\\); console.log\\(''version:'', p.version\\); console.log\\(''peerDeps:'', JSON.stringify\\(p.peerDependencies\\)\\)\")",
+      "Bash(npx shadcn@latest add switch --yes)"
     ]
   }
 }

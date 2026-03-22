@@ -1,7 +1,7 @@
 import { SiteHeader } from "@/components/site-header"
-import { SectionCards } from "@/components/section-cards"
-import { FundAllocationChart } from "@/components/fund-allocation-chart"
-import { RecentTransactions } from "@/components/recent-transactions"
+import { SectionCards } from "@/app/dashboard/_components/section-cards"
+import { FundAllocationChart } from "@/app/dashboard/_components/fund-allocation-chart"
+import { RecentTransactions } from "@/app/dashboard/_components/recent-transactions"
 
 export default function DashboardPage() {
   return (

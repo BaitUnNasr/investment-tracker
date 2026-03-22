@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { UsersIcon, UserCheckIcon, WalletIcon, TrendingUpIcon } from "lucide-react"
-import { AddClientDialog } from "@/components/add-client-dialog"
-import { UploadClientsBtn } from "@/components/upload-clients-btn"
+import { AddClientDialog } from "@/app/dashboard/clients/_components/add-client-dialog"
+import { UploadClientsBtn } from "@/app/dashboard/clients/_components/upload-clients-btn"
 import { ClientsTable } from "./_components/clients-table"
 import { getClientData, getStats, getBranches } from "./actions"
 

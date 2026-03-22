@@ -4,8 +4,8 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { NavSecondary } from "@/app/dashboard/_components/sidebar/nav-secondary"
+import { NavUser } from "@/app/dashboard/_components/sidebar/nav-user"
 import {
   Sidebar,
   SidebarContent,

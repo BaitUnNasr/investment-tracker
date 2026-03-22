@@ -1,5 +1,5 @@
 import { SiteHeader } from "@/components/site-header"
-import { UploadNavBtn } from "@/components/upload-nav-btn"
+import { UploadNavBtn } from "@/app/dashboard/funds/nav/_components/upload-nav-btn"
 import {
   Card,
   CardContent,

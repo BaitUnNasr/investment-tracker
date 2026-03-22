@@ -69,7 +69,7 @@ const InfoCard = () => (
 )
 
 // ── Main component ───────────────────────────────────────────────────────────
-const SignIn = () => {
+const LoginForm = () => {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
@@ -208,4 +208,4 @@ const SignIn = () => {
   )
 }
 
-export default SignIn
+export default LoginForm

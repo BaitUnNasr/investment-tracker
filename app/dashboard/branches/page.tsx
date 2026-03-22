@@ -80,19 +80,12 @@ export default async function BranchesPage() {
         </div>
 
         {/* Branch table */}
-        <Card className="min-w-0">
-          <CardHeader>
+        <Card className="min-w-0 p-0 gap-0">
+          <CardHeader className="px-4 py-4">
             <CardTitle>Branch List</CardTitle>
-            <CardDescription>
-              {branchData.length === 0
-                ? "No branches yet. Add your first branch to get started."
-                : `${branchData.length} branch${branchData.length !== 1 ? "es" : ""} registered`}
-            </CardDescription>
           </CardHeader>
           <Separator />
-          <CardContent className="pt-4">
-            <BranchesTable data={branchData} />
-          </CardContent>
+          <BranchesTable data={branchData} />
         </Card>
 
       </div>

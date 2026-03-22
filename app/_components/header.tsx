@@ -42,7 +42,7 @@ const Header = () => {
                         href={session ? "/dashboard" : "/login"}
                         className="h-9 px-5 rounded-full bg-foreground text-background text-sm font-medium flex items-center hover:opacity-85 transition-opacity"
                      >
-                        {session ? "Go to Dashboard" : "Get Started"}
+                        {session ? "Dashboard" : "Get Started"}
                      </Link>
                   )}
             </div>

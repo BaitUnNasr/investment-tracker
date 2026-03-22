@@ -1,7 +1,6 @@
 import { SiteHeader } from "@/components/site-header"
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -15,68 +14,18 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import { DownloadIcon } from "lucide-react"
 
-// Placeholder: NAV unit allotments per client per fund
-// units = invested_amount / nav_value_on_transaction_date
-// These would be computed from the database in production
 const fundReport = [
-  {
-    client: "Sarah M. Kazi",
-    code: "075-001",
-    tefInvested: 4550,
-    tefUnits: 246.83,
-    tefCurrentValue: 4548.00,
-    tgfInvested: 3900,
-    tgfUnits: 157.36,
-    tgfCurrentValue: 3901.40,
-    propertyValue: 4550,
-  },
-  {
-    client: "Sohel U. Patel",
-    code: "075-002",
-    tefInvested: 4550,
-    tefUnits: 246.83,
-    tefCurrentValue: 4548.00,
-    tgfInvested: 3900,
-    tgfUnits: 157.36,
-    tgfCurrentValue: 3901.40,
-    propertyValue: 4550,
-  },
-  {
-    client: "Liza F. Qureshi",
-    code: "075-003",
-    tefInvested: 3675,
-    tefUnits: 199.36,
-    tefCurrentValue: 3673.60,
-    tgfInvested: 3150,
-    tgfUnits: 127.13,
-    tgfCurrentValue: 3151.60,
-    propertyValue: 3675,
-  },
-  {
-    client: "Sharukh I. Khan",
-    code: "075-004",
-    tefInvested: 1050,
-    tefUnits: 56.96,
-    tefCurrentValue: 1049.60,
-    tgfInvested: 900,
-    tgfUnits: 36.32,
-    tgfCurrentValue: 900.46,
-    propertyValue: 1050,
-  },
-  {
-    client: "Saleem K. Khan",
-    code: "075-005",
-    tefInvested: 1750,
-    tefUnits: 94.93,
-    tefCurrentValue: 1749.34,
-    tgfInvested: 1500,
-    tgfUnits: 60.53,
-    tgfCurrentValue: 1500.77,
-    propertyValue: 1750,
-  },
+  { client: "Sarah M. Kazi",    code: "075-001", tefInvested: 4550,  tefUnits: 246.83, tefCurrentValue: 4548.00,  tgfInvested: 3900, tgfUnits: 157.36, tgfCurrentValue: 3901.40, propertyValue: 4550 },
+  { client: "Sohel U. Patel",   code: "075-002", tefInvested: 4550,  tefUnits: 246.83, tefCurrentValue: 4548.00,  tgfInvested: 3900, tgfUnits: 157.36, tgfCurrentValue: 3901.40, propertyValue: 4550 },
+  { client: "Liza F. Qureshi",  code: "075-003", tefInvested: 3675,  tefUnits: 199.36, tefCurrentValue: 3673.60,  tgfInvested: 3150, tgfUnits: 127.13, tgfCurrentValue: 3151.60, propertyValue: 3675 },
+  { client: "Sharukh I. Khan",  code: "075-004", tefInvested: 1050,  tefUnits: 56.96,  tefCurrentValue: 1049.60,  tgfInvested: 900,  tgfUnits: 36.32,  tgfCurrentValue: 900.46,  propertyValue: 1050 },
+  { client: "Saleem K. Khan",   code: "075-005", tefInvested: 1750,  tefUnits: 94.93,  tefCurrentValue: 1749.34,  tgfInvested: 1500, tgfUnits: 60.53,  tgfCurrentValue: 1500.77, propertyValue: 1750 },
 ]
+
+const theadCls = "text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3"
 
 export default function FundReportsPage() {
   return (
@@ -97,98 +46,96 @@ export default function FundReportsPage() {
         </div>
 
         <div className="grid gap-4 @xl/main:grid-cols-2">
-          <Card className="border-blue-200 dark:border-blue-900">
-            <CardHeader>
-              <CardTitle className="text-blue-700 dark:text-blue-400">
-                Tata Ethical Fund (TEF)
-              </CardTitle>
+          {/* TEF */}
+          <Card className="p-0 gap-0 border-blue-200 dark:border-blue-900">
+            <CardHeader className="px-4 py-4">
+              <CardTitle className="text-blue-700 dark:text-blue-400">Tata Ethical Fund (TEF)</CardTitle>
               <CardDescription>Latest NAV: ₹18.4521 · Allocation: 35%</CardDescription>
             </CardHeader>
-            <CardContent>
+            <Separator />
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Client</TableHead>
-                    <TableHead className="text-right">Invested (₹)</TableHead>
-                    <TableHead className="text-right">Units</TableHead>
-                    <TableHead className="text-right">Current Value (₹)</TableHead>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
+                    <TableHead className={theadCls}>Client</TableHead>
+                    <TableHead className={`${theadCls} text-right`}>Invested (₹)</TableHead>
+                    <TableHead className={`${theadCls} text-right`}>Units</TableHead>
+                    <TableHead className={`${theadCls} text-right`}>Current Value (₹)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {fundReport.map((row) => (
-                    <TableRow key={row.code}>
+                    <TableRow key={row.code} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                       <TableCell className="text-sm">{row.client}</TableCell>
-                      <TableCell className="text-right">{row.tefInvested.toLocaleString("en-IN")}</TableCell>
-                      <TableCell className="text-right font-mono">{row.tefUnits.toFixed(3)}</TableCell>
-                      <TableCell className="text-right font-medium">{row.tefCurrentValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</TableCell>
+                      <TableCell className="text-right tabular-nums">{row.tefInvested.toLocaleString("en-IN")}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{row.tefUnits.toFixed(3)}</TableCell>
+                      <TableCell className="text-right font-medium tabular-nums">{row.tefCurrentValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
+            </div>
           </Card>
 
-          <Card className="border-amber-200 dark:border-amber-900">
-            <CardHeader>
-              <CardTitle className="text-amber-700 dark:text-amber-400">
-                Tata Gold Fund (TGF)
-              </CardTitle>
+          {/* TGF */}
+          <Card className="p-0 gap-0 border-amber-200 dark:border-amber-900">
+            <CardHeader className="px-4 py-4">
+              <CardTitle className="text-amber-700 dark:text-amber-400">Tata Gold Fund (TGF)</CardTitle>
               <CardDescription>Latest NAV: ₹24.7830 · Allocation: 30%</CardDescription>
             </CardHeader>
-            <CardContent>
+            <Separator />
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Client</TableHead>
-                    <TableHead className="text-right">Invested (₹)</TableHead>
-                    <TableHead className="text-right">Units</TableHead>
-                    <TableHead className="text-right">Current Value (₹)</TableHead>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
+                    <TableHead className={theadCls}>Client</TableHead>
+                    <TableHead className={`${theadCls} text-right`}>Invested (₹)</TableHead>
+                    <TableHead className={`${theadCls} text-right`}>Units</TableHead>
+                    <TableHead className={`${theadCls} text-right`}>Current Value (₹)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {fundReport.map((row) => (
-                    <TableRow key={row.code}>
+                    <TableRow key={row.code} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                       <TableCell className="text-sm">{row.client}</TableCell>
-                      <TableCell className="text-right">{row.tgfInvested.toLocaleString("en-IN")}</TableCell>
-                      <TableCell className="text-right font-mono">{row.tgfUnits.toFixed(3)}</TableCell>
-                      <TableCell className="text-right font-medium">{row.tgfCurrentValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</TableCell>
+                      <TableCell className="text-right tabular-nums">{row.tgfInvested.toLocaleString("en-IN")}</TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">{row.tgfUnits.toFixed(3)}</TableCell>
+                      <TableCell className="text-right font-medium tabular-nums">{row.tgfCurrentValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
+            </div>
           </Card>
         </div>
 
-        <Card className="border-emerald-200 dark:border-emerald-900">
-          <CardHeader>
-            <CardTitle className="text-emerald-700 dark:text-emerald-400">
-              Property Allocation
-            </CardTitle>
-            <CardDescription>
-              Tracked as cash value · Allocation: 35%
-            </CardDescription>
+        {/* Property */}
+        <Card className="p-0 gap-0 border-emerald-200 dark:border-emerald-900">
+          <CardHeader className="px-4 py-4">
+            <CardTitle className="text-emerald-700 dark:text-emerald-400">Property Allocation</CardTitle>
+            <CardDescription>Tracked as cash value · Allocation: 35%</CardDescription>
           </CardHeader>
-          <CardContent>
+          <Separator />
+          <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Client</TableHead>
-                  <TableHead className="text-right">Allocated Value (₹)</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
+                  <TableHead className={theadCls}>Client</TableHead>
+                  <TableHead className={`${theadCls} text-right`}>Allocated Value (₹)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {fundReport.map((row) => (
-                  <TableRow key={row.code}>
-                    <TableCell>{row.client}</TableCell>
-                    <TableCell className="text-right font-medium text-emerald-600">
+                  <TableRow key={row.code} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <TableCell className="text-sm">{row.client}</TableCell>
+                    <TableCell className="text-right font-medium text-emerald-600 tabular-nums">
                       ₹{row.propertyValue.toLocaleString("en-IN")}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </>

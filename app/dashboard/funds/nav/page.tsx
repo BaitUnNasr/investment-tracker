@@ -1,25 +1,17 @@
 import { SiteHeader } from "@/components/site-header"
 import { UploadNavBtn } from "@/app/dashboard/funds/nav/_components/upload-nav-btn"
+import { NavTable } from "@/app/dashboard/funds/nav/_components/nav-table"
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Placeholder NAV data — replace with DB query
-// Source: Historic_NAV_since_inception_to_7-Feb-2026 files
 const tefNav = [
   { date: "07/02/2026", nav: 18.4521, change: +0.12 },
   { date: "06/02/2026", nav: 18.3401, change: -0.08 },
@@ -35,36 +27,6 @@ const tgfNav = [
   { date: "04/02/2026", nav: 24.3730, change: +0.42 },
   { date: "03/02/2026", nav: 23.9530, change: +0.09 },
 ]
-
-function NavTable({ data }: { data: typeof tefNav }) {
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Date</TableHead>
-          <TableHead className="text-right">NAV (₹)</TableHead>
-          <TableHead className="text-right">Change</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((row, i) => (
-          <TableRow key={i}>
-            <TableCell>{row.date}</TableCell>
-            <TableCell className="text-right font-mono font-medium">
-              {row.nav.toFixed(4)}
-            </TableCell>
-            <TableCell className="text-right">
-              <span className={row.change >= 0 ? "text-emerald-600" : "text-red-500"}>
-                {row.change >= 0 ? "+" : ""}
-                {row.change.toFixed(2)}
-              </span>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-}
 
 export default function NavDataPage() {
   return (
@@ -82,7 +44,7 @@ export default function NavDataPage() {
         </div>
 
         {/* Latest NAV summary cards */}
-        <div className="grid gap-4 @xl/main:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -93,14 +55,12 @@ export default function NavDataPage() {
                 ₹{tefNav[0].nav.toFixed(4)}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                As of {tefNav[0].date} &nbsp;|&nbsp;
-                <span className={tefNav[0].change >= 0 ? "text-emerald-600" : "text-red-500"}>
-                  {tefNav[0].change >= 0 ? "▲" : "▼"} {Math.abs(tefNav[0].change).toFixed(2)}
-                </span>
-              </p>
-            </CardContent>
+            <p className="px-6 pb-4 text-sm text-muted-foreground">
+              As of {tefNav[0].date} &nbsp;|&nbsp;
+              <span className={tefNav[0].change >= 0 ? "text-emerald-600" : "text-red-500"}>
+                {tefNav[0].change >= 0 ? "▲" : "▼"} {Math.abs(tefNav[0].change).toFixed(2)}
+              </span>
+            </p>
           </Card>
           <Card>
             <CardHeader className="pb-2">
@@ -112,39 +72,38 @@ export default function NavDataPage() {
                 ₹{tgfNav[0].nav.toFixed(4)}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                As of {tgfNav[0].date} &nbsp;|&nbsp;
-                <span className={tgfNav[0].change >= 0 ? "text-emerald-600" : "text-red-500"}>
-                  {tgfNav[0].change >= 0 ? "▲" : "▼"} {Math.abs(tgfNav[0].change).toFixed(2)}
-                </span>
-              </p>
-            </CardContent>
+            <p className="px-6 pb-4 text-sm text-muted-foreground">
+              As of {tgfNav[0].date} &nbsp;|&nbsp;
+              <span className={tgfNav[0].change >= 0 ? "text-emerald-600" : "text-red-500"}>
+                {tgfNav[0].change >= 0 ? "▲" : "▼"} {Math.abs(tgfNav[0].change).toFixed(2)}
+              </span>
+            </p>
           </Card>
         </div>
 
         {/* NAV history tabs */}
-        <Card>
-          <CardHeader>
+        <Card className="p-0 gap-0">
+          <CardHeader className="px-4 py-4">
             <CardTitle>NAV History</CardTitle>
             <CardDescription>
               Daily NAV values used to calculate client unit allotments
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="tef">
-              <TabsList className="mb-4">
+          <Separator />
+          <Tabs defaultValue="tef">
+            <div className="px-4 pt-4">
+              <TabsList>
                 <TabsTrigger value="tef">Tata Ethical Fund (TEF)</TabsTrigger>
                 <TabsTrigger value="tgf">Tata Gold Fund (TGF)</TabsTrigger>
               </TabsList>
-              <TabsContent value="tef">
-                <NavTable data={tefNav} />
-              </TabsContent>
-              <TabsContent value="tgf">
-                <NavTable data={tgfNav} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
+            </div>
+            <TabsContent value="tef" className="mt-0">
+              <NavTable data={tefNav} />
+            </TabsContent>
+            <TabsContent value="tgf" className="mt-0">
+              <NavTable data={tgfNav} />
+            </TabsContent>
+          </Tabs>
         </Card>
       </div>
     </>

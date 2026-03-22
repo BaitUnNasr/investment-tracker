@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useTransition } from "react"
+import { useState, useMemo } from "react"
 import {
   useReactTable,
   getCoreRowModel,
@@ -38,19 +38,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
   SearchIcon,
-  Trash2Icon,
-  PencilIcon,
-  LockIcon,
-  BuildingIcon,
+  EyeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsLeftIcon,
@@ -59,22 +48,36 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
 } from "lucide-react"
-import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import { EditBranchDialog, type Branch as BranchBase } from "./edit-branch-dialog"
-import { deleteBranch } from "@/app/dashboard/branches/actions"
 
-type Branch = BranchBase & {
-  clients: number
-  totalCorpus: number
+export type AccountRow = {
+  id: string
+  accountNo: string
+  client: string
+  scheme: string
+  weeklyAmt: number
+  startDate: string
+  installments: number
+  totalInvested: number
+  status: string
+}
+
+const SCHEME_COLORS: Record<string, string> = {
+  RTD:  "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300",
+  DSTD: "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300",
+  LTD:  "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50]
 
-// Defined outside component — stable reference, no recreations
-const statusFilterFn: FilterFn<Branch> = (row, _columnId, filterValue) => {
+const schemeFilterFn: FilterFn<AccountRow> = (row, _, filterValue) => {
   if (filterValue === "all") return true
-  return filterValue === "active" ? !!row.original.isActive : !row.original.isActive
+  return row.original.scheme === filterValue
+}
+
+const statusFilterFn: FilterFn<AccountRow> = (row, _, filterValue) => {
+  if (filterValue === "all") return true
+  return row.original.status === filterValue
 }
 
 function SortableHeader<T>({
@@ -104,71 +107,84 @@ function SortableHeader<T>({
   )
 }
 
-export function BranchesTable({ data }: { data: Branch[] }) {
-  const [sorting, setSorting] = useState<SortingState>([])
+export function AccountsTable({ data }: { data: AccountRow[] }) {
+  const [sorting, setSorting]           = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState("")
+  const [schemeFilter, setSchemeFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [editingBranch, setEditingBranch] = useState<Branch | null>(null)
-  const [branchToDelete, setBranchToDelete] = useState<Branch | null>(null)
-  const [isPending, startTransition] = useTransition()
 
-  // useMemo prevents columns from being recreated on every render,
-  // which was causing TanStack Table to loop and hang on sort.
-  const columns = useMemo<ColumnDef<Branch>[]>(() => [
+  const schemes = useMemo(() => [...new Set(data.map((a) => a.scheme))].sort(), [data])
+
+  const columns = useMemo<ColumnDef<AccountRow>[]>(() => [
     {
-      accessorKey: "code",
-      header: ({ column }) => <SortableHeader column={column} label="Code" />,
+      accessorKey: "accountNo",
+      header: ({ column }) => <SortableHeader column={column} label="Account No." />,
       cell: ({ getValue }) => (
-        <span className="font-mono text-sm font-medium text-primary">
-          #{getValue<string>()}
-        </span>
+        <span className="font-mono text-sm font-medium">{getValue<string>()}</span>
       ),
     },
     {
-      accessorKey: "name",
-      header: ({ column }) => <SortableHeader column={column} label="Branch" />,
-      cell: ({ row }) => (
-        <div>
-          <div className="font-medium leading-tight">{row.original.name}</div>
-          {row.original.city && (
-            <div className="text-xs text-muted-foreground">{row.original.city}</div>
-          )}
+      accessorKey: "client",
+      header: ({ column }) => <SortableHeader column={column} label="Client" />,
+      cell: ({ getValue }) => (
+        <span className="text-sm">{getValue<string>()}</span>
+      ),
+    },
+    {
+      id: "scheme",
+      accessorKey: "scheme",
+      header: ({ column }) => <SortableHeader column={column} label="Scheme" />,
+      filterFn: schemeFilterFn,
+      cell: ({ getValue }) => {
+        const scheme = getValue<string>()
+        return (
+          <Badge variant="outline" className={SCHEME_COLORS[scheme] ?? ""}>{scheme}</Badge>
+        )
+      },
+    },
+    {
+      accessorKey: "weeklyAmt",
+      header: ({ column }) => (
+        <SortableHeader column={column} label="Weekly (₹)" className="ml-auto" />
+      ),
+      cell: ({ getValue }) => (
+        <div className="text-right tabular-nums text-sm">
+          {getValue<number>().toLocaleString("en-IN")}
         </div>
       ),
     },
     {
-      accessorKey: "phone",
-      header: ({ column }) => <SortableHeader column={column} label="Phone" />,
-      cell: ({ getValue }) => (
-        <span className="text-sm text-muted-foreground">{getValue<string>() ?? "—"}</span>
-      ),
+      accessorKey: "startDate",
+      header: ({ column }) => <SortableHeader column={column} label="Start Date" />,
+      cell: ({ getValue }) => <span className="text-sm">{getValue<string>()}</span>,
     },
     {
-      accessorKey: "clients",
+      accessorKey: "installments",
       header: ({ column }) => (
-        <SortableHeader column={column} label="Clients" className="ml-auto" />
+        <SortableHeader column={column} label="Installments" className="ml-auto" />
       ),
       cell: ({ getValue }) => (
         <div className="text-right tabular-nums text-sm">{getValue<number>()}</div>
       ),
     },
     {
-      accessorKey: "totalCorpus",
+      accessorKey: "totalInvested",
       header: ({ column }) => (
-        <SortableHeader column={column} label="Total Corpus" className="ml-auto" />
+        <SortableHeader column={column} label="Total Invested (₹)" className="ml-auto" />
       ),
       cell: ({ getValue }) => (
         <div className="text-right tabular-nums text-sm font-medium">
-          ₹{getValue<number>().toLocaleString("en-IN")}
+          {getValue<number>().toLocaleString("en-IN")}
         </div>
       ),
     },
     {
-      accessorKey: "isActive",
+      id: "status",
+      accessorKey: "status",
       header: ({ column }) => <SortableHeader column={column} label="Status" />,
       filterFn: statusFilterFn,
       cell: ({ getValue }) => {
-        const active = getValue<boolean>()
+        const active = getValue<string>() === "active"
         return (
           <Badge
             variant="outline"
@@ -179,70 +195,31 @@ export function BranchesTable({ data }: { data: Branch[] }) {
             }
           >
             <span className={`mr-1.5 size-1.5 rounded-full inline-block ${active ? "bg-green-500" : "bg-muted-foreground"}`} />
-            {active ? "Active" : "Inactive"}
+            {getValue<string>()}
           </Badge>
         )
       },
     },
     {
       id: "actions",
-      header: () => <div className="text-right pr-2">Actions</div>,
+      header: () => null,
       enableSorting: false,
-      cell: ({ row }) => {
-        const locked = row.original.clients > 0
-        return (
-          <TooltipProvider>
-            <div className="flex items-center justify-end gap-1 pr-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 text-muted-foreground hover:text-foreground"
-                    aria-label="Edit branch"
-                    onClick={() => setEditingBranch(row.original)}
-                  >
-                    <PencilIcon className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  {/* span needed so tooltip fires on disabled button */}
-                  <span tabIndex={locked ? 0 : -1} className="inline-flex">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={cn(
-                        "size-8",
-                        locked
-                          ? "text-muted-foreground/40 cursor-not-allowed pointer-events-none"
-                          : "text-muted-foreground hover:text-destructive hover:bg-destructive/10",
-                      )}
-                      aria-label="Delete branch"
-                      disabled={locked}
-                      onClick={() => !locked && setBranchToDelete(row.original)}
-                    >
-                      {locked
-                        ? <LockIcon className="size-4" />
-                        : <Trash2Icon className="size-4" />}
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {locked
-                    ? `Cannot delete — ${row.original.clients} client${row.original.clients !== 1 ? "s" : ""} assigned`
-                    : "Delete"}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
-        )
-      },
+      cell: () => (
+        <TooltipProvider>
+          <div className="flex justify-end pr-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground">
+                  <EyeIcon className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>View account</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
+      ),
     },
-  ], []) // empty deps — setters from useState are stable
+  ], [])
 
   const table = useReactTable({
     data,
@@ -250,7 +227,10 @@ export function BranchesTable({ data }: { data: Branch[] }) {
     state: {
       sorting,
       globalFilter,
-      columnFilters: [{ id: "isActive", value: statusFilter }],
+      columnFilters: [
+        { id: "scheme", value: schemeFilter },
+        { id: "status", value: statusFilter },
+      ],
     },
     enableSortingRemoval: true,
     autoResetPageIndex: false,
@@ -268,50 +248,47 @@ export function BranchesTable({ data }: { data: Branch[] }) {
   const totalFiltered = table.getFilteredRowModel().rows.length
   const pageCount = table.getPageCount()
 
-  function confirmDelete() {
-    if (!branchToDelete) return
-    const branch = branchToDelete
-    setBranchToDelete(null)
-    startTransition(async () => {
-      const result = await deleteBranch(branch.id)
-      if ("error" in result) {
-        toast.error(result.error)
-      } else {
-        toast.success(`Branch "${branch.name}" deleted`)
-      }
-    })
-  }
-
   return (
-    <div className="space-y-0">
+    <div>
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b">
         <div className="relative min-w-[220px] max-w-xs flex-1">
           <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             className="pl-8 h-9 bg-background"
-            placeholder="Filter branch name…"
+            placeholder="Filter account no., client…"
             value={globalFilter}
             onChange={(e) => { setGlobalFilter(e.target.value); table.setPageIndex(0) }}
           />
         </div>
 
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => { setStatusFilter(v); table.setPageIndex(0) }}
-        >
-          <SelectTrigger className="h-9 w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select value={schemeFilter} onValueChange={(v) => { setSchemeFilter(v); table.setPageIndex(0) }}>
+            <SelectTrigger className="h-9 w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Schemes</SelectItem>
+              {schemes.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); table.setPageIndex(0) }}>
+            <SelectTrigger className="h-9 w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Table — always rendered so header stays visible even when empty */}
+      {/* Table */}
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -328,16 +305,8 @@ export function BranchesTable({ data }: { data: Branch[] }) {
           <TableBody>
             {table.getRowModel().rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="py-20 text-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <BuildingIcon className="size-10 text-muted-foreground/30" />
-                    <p className="text-sm font-medium">No branches found</p>
-                    <p className="text-xs text-muted-foreground">
-                      {globalFilter || statusFilter !== "all"
-                        ? "Try adjusting your search or filter."
-                        : "Click \"Add Branch\" to create your first branch."}
-                    </p>
-                  </div>
+                <TableCell colSpan={columns.length} className="py-16 text-center text-sm text-muted-foreground">
+                  No accounts found.
                 </TableCell>
               </TableRow>
             ) : (
@@ -403,36 +372,6 @@ export function BranchesTable({ data }: { data: Branch[] }) {
           </div>
         </div>
       )}
-
-      {editingBranch && (
-        <EditBranchDialog
-          branch={editingBranch}
-          open={true}
-          onClose={() => setEditingBranch(null)}
-        />
-      )}
-
-      <Dialog
-        open={branchToDelete !== null}
-        onOpenChange={(open) => { if (!open) setBranchToDelete(null) }}
-      >
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Delete Branch</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete{" "}
-              <span className="font-medium text-foreground">{branchToDelete?.name}</span>?
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="pt-2">
-            <Button variant="outline" onClick={() => setBranchToDelete(null)}>Cancel</Button>
-            <Button variant="destructive" disabled={isPending} onClick={confirmDelete}>
-              {isPending ? "Deleting…" : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

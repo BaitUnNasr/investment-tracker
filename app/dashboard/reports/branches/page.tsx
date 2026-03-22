@@ -1,7 +1,6 @@
 import { SiteHeader } from "@/components/site-header"
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -15,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import { DownloadIcon } from "lucide-react"
 
 const branchReport = [
@@ -31,6 +31,8 @@ const branchReport = [
     property: 17325,
   },
 ]
+
+const theadCls = "text-xs font-semibold uppercase tracking-wider text-muted-foreground py-3"
 
 export default function BranchReportsPage() {
   return (
@@ -50,55 +52,46 @@ export default function BranchReportsPage() {
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
+        <Card className="p-0 gap-0">
+          <CardHeader className="px-4 py-4">
             <CardTitle>Branch Summary</CardTitle>
             <CardDescription>Total corpus and fund allocation per branch</CardDescription>
           </CardHeader>
-          <CardContent>
+          <Separator />
+          <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Branch</TableHead>
-                  <TableHead>City</TableHead>
-                  <TableHead className="text-right">Clients</TableHead>
-                  <TableHead className="text-right">Accounts</TableHead>
-                  <TableHead className="text-right">Weekly (₹)</TableHead>
-                  <TableHead className="text-right">Total Corpus</TableHead>
-                  <TableHead className="text-right text-blue-600">TEF</TableHead>
-                  <TableHead className="text-right text-amber-600">TGF</TableHead>
-                  <TableHead className="text-right text-emerald-600">Property</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
+                  <TableHead className={theadCls}>Code</TableHead>
+                  <TableHead className={theadCls}>Branch</TableHead>
+                  <TableHead className={theadCls}>City</TableHead>
+                  <TableHead className={`${theadCls} text-right`}>Clients</TableHead>
+                  <TableHead className={`${theadCls} text-right`}>Accounts</TableHead>
+                  <TableHead className={`${theadCls} text-right`}>Weekly (₹)</TableHead>
+                  <TableHead className={`${theadCls} text-right`}>Total Corpus</TableHead>
+                  <TableHead className={`${theadCls} text-right text-blue-600`}>TEF</TableHead>
+                  <TableHead className={`${theadCls} text-right text-amber-600`}>TGF</TableHead>
+                  <TableHead className={`${theadCls} text-right text-emerald-600`}>Property</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {branchReport.map((branch) => (
-                  <TableRow key={branch.code}>
+                  <TableRow key={branch.code} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                     <TableCell className="font-mono font-medium">{branch.code}</TableCell>
-                    <TableCell>{branch.name}</TableCell>
-                    <TableCell>{branch.city}</TableCell>
-                    <TableCell className="text-right">{branch.clients}</TableCell>
-                    <TableCell className="text-right">{branch.activeAccounts}</TableCell>
-                    <TableCell className="text-right">
-                      ₹{branch.weeklyCollection.toLocaleString("en-IN")}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      ₹{branch.totalInvested.toLocaleString("en-IN")}
-                    </TableCell>
-                    <TableCell className="text-right text-blue-600">
-                      ₹{branch.tef.toLocaleString("en-IN")}
-                    </TableCell>
-                    <TableCell className="text-right text-amber-600">
-                      ₹{branch.tgf.toLocaleString("en-IN")}
-                    </TableCell>
-                    <TableCell className="text-right text-emerald-600">
-                      ₹{branch.property.toLocaleString("en-IN")}
-                    </TableCell>
+                    <TableCell className="text-sm">{branch.name}</TableCell>
+                    <TableCell className="text-sm">{branch.city}</TableCell>
+                    <TableCell className="text-right tabular-nums">{branch.clients}</TableCell>
+                    <TableCell className="text-right tabular-nums">{branch.activeAccounts}</TableCell>
+                    <TableCell className="text-right tabular-nums">₹{branch.weeklyCollection.toLocaleString("en-IN")}</TableCell>
+                    <TableCell className="text-right font-semibold tabular-nums">₹{branch.totalInvested.toLocaleString("en-IN")}</TableCell>
+                    <TableCell className="text-right text-blue-600 tabular-nums">₹{branch.tef.toLocaleString("en-IN")}</TableCell>
+                    <TableCell className="text-right text-amber-600 tabular-nums">₹{branch.tgf.toLocaleString("en-IN")}</TableCell>
+                    <TableCell className="text-right text-emerald-600 tabular-nums">₹{branch.property.toLocaleString("en-IN")}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </>

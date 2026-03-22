@@ -99,19 +99,12 @@ export default async function ClientsPage() {
         </div>
 
         {/* Client table */}
-        <Card className="min-w-0">
-          <CardHeader>
+        <Card className="min-w-0 p-0 gap-0">
+          <CardHeader className="px-4 py-4">
             <CardTitle>Client List</CardTitle>
-            <CardDescription>
-              {clientData.length === 0
-                ? "No clients yet. Add or import clients to get started."
-                : `${clientData.length} client${clientData.length !== 1 ? "s" : ""} registered`}
-            </CardDescription>
           </CardHeader>
           <Separator />
-          <CardContent className="pt-4">
-            <ClientsTable data={clientData} branches={branchList} />
-          </CardContent>
+          <ClientsTable data={clientData} branches={branchList} />
         </Card>
 
       </div>

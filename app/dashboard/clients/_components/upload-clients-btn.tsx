@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import * as XLSX from "xlsx"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { CheckCircleIcon, FileIcon, UploadIcon, AlertCircleIcon, XCircleIcon } from "lucide-react"
 import { toast } from "sonner"
+import { validateClientRows } from "@/app/dashboard/clients/actions"
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -24,9 +26,10 @@ interface ClientRow {
   branchCode: string
   email: string
   phone: string
+  address: string
+  accountNumber: string
   schemeType: string
   weeklyAmount: number | null
-  accountNumber: string
   startDate: string
   errors: string[]
 }
@@ -37,32 +40,41 @@ interface UploadResult {
   errors: string[]
 }
 
-// ─── CSV helpers ──────────────────────────────────────────────────────────────
+// ─── Excel helpers ─────────────────────────────────────────────────────────
 
-function parseCsvLine(line: string): string[] {
-  const result: string[] = []
-  let current = ""
-  let inQuotes = false
-  for (const ch of line) {
-    if (ch === '"') { inQuotes = !inQuotes }
-    else if (ch === "," && !inQuotes) { result.push(current.trim()); current = "" }
-    else { current += ch }
+const DATE_RE    = /^\d{2}\/\d{2}\/\d{4}$/
+const VALID_SCHEMES = ["RTD", "DSTD", "LTD"]
+
+/** Convert any cell value to a DD/MM/YYYY string, or return the raw string */
+function normalizeDateCell(value: unknown): string {
+  if (value === null || value === undefined || value === "") return ""
+  // SheetJS serial number → JS Date
+  if (typeof value === "number") {
+    const d = XLSX.SSF.parse_date_code(value)
+    if (!d) return String(value)
+    const dd   = String(d.d).padStart(2, "0")
+    const mm   = String(d.m).padStart(2, "0")
+    const yyyy = String(d.y)
+    return `${dd}/${mm}/${yyyy}`
   }
-  result.push(current.trim())
-  return result
+  // Already a string — accept DD/MM/YYYY or YYYY-MM-DD and normalise
+  const s = String(value).trim()
+  const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (isoMatch) return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`
+  return s
 }
 
-const DATE_RE = /^\d{2}\/\d{2}\/\d{4}$/
-const VALID_SCHEMES = ["RTD", "DSTD", "LTD"]
+function str(value: unknown): string {
+  if (value === null || value === undefined) return ""
+  return String(value).trim()
+}
 
 function validateClientRow(row: Omit<ClientRow, "errors">): string[] {
   const errs: string[] = []
-  // Required
   if (!row.clientCode) errs.push("Client code is missing")
   if (!row.firstName)  errs.push("First name is missing")
   if (!row.lastName)   errs.push("Last name is missing")
   if (!row.branchCode) errs.push("Branch code is missing")
-  // Account fields — only validate if any are present
   if (row.schemeType && !VALID_SCHEMES.includes(row.schemeType.toUpperCase()))
     errs.push(`Scheme must be RTD, DSTD or LTD (got "${row.schemeType}")`)
   if (row.weeklyAmount !== null && row.weeklyAmount !== undefined && row.weeklyAmount <= 0)
@@ -72,27 +84,37 @@ function validateClientRow(row: Omit<ClientRow, "errors">): string[] {
   return errs
 }
 
-function parseAndValidateCsv(text: string): ClientRow[] {
-  // Expected header: Client Code,First Name,Last Name,Branch Code,Email,Phone,Scheme Type,Weekly Amount,Account Number,Start Date
-  const lines = text.replace(/\r/g, "").split("\n").map((l) => l.trim()).filter(Boolean)
-  if (lines.length < 2) return []
+function parseAndValidateExcel(buffer: ArrayBuffer): ClientRow[] {
+  const wb   = XLSX.read(buffer, { type: "array", cellDates: false })
+  const ws   = wb.Sheets[wb.SheetNames[0]]
+  // Get raw rows as arrays (header row = index 0)
+  const data = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: "" })
+  if (data.length < 2) return []
+
   const rows: ClientRow[] = []
-  for (let i = 1; i < lines.length; i++) {
-    const cols = parseCsvLine(lines[i])
-    if (cols.every((c) => !c) || cols.length < 4) continue
-    const weeklyAmount = parseFloat((cols[7] ?? "").replace(/,/g, "")) || null
+  for (let i = 1; i < data.length; i++) {
+    const cols = data[i] as unknown[]
+    // Skip fully empty rows
+    if (cols.every((c) => c === "" || c === null || c === undefined)) continue
+
+    const weeklyRaw   = cols[9]
+    const weeklyAmount = typeof weeklyRaw === "number" && weeklyRaw > 0
+      ? weeklyRaw
+      : parseFloat(str(weeklyRaw).replace(/,/g, "")) || null
+
     const base = {
       rowNum:        i,
-      clientCode:    cols[0] ?? "",
-      firstName:     cols[1] ?? "",
-      lastName:      cols[2] ?? "",
-      branchCode:    cols[3] ?? "",
-      email:         cols[4] ?? "",
-      phone:         cols[5] ?? "",
-      schemeType:    (cols[6] ?? "").toUpperCase(),
+      clientCode:    str(cols[0]),
+      firstName:     str(cols[1]),
+      lastName:      str(cols[2]),
+      branchCode:    str(cols[3]),
+      email:         str(cols[4]),
+      phone:         str(cols[5]),
+      address:       str(cols[6]),
+      accountNumber: str(cols[7]),
+      schemeType:    str(cols[8]).toUpperCase(),
       weeklyAmount,
-      accountNumber: cols[8] ?? "",
-      startDate:     cols[9] ?? "",
+      startDate:     normalizeDateCell(cols[10]),
     }
     rows.push({ ...base, errors: validateClientRow(base) })
   }
@@ -101,7 +123,7 @@ function parseAndValidateCsv(text: string): ClientRow[] {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-type Step = "idle" | "preview" | "uploading" | "done"
+type Step = "idle" | "validating" | "preview" | "uploading" | "done"
 
 export function UploadClientsBtn() {
   const [open, setOpen]     = useState(false)
@@ -118,8 +140,33 @@ export function UploadClientsBtn() {
   function handleFileSelect(f: File) {
     setFile(f); setStep("idle"); setResult(null)
     const reader = new FileReader()
-    reader.onload = (e) => { setRows(parseAndValidateCsv(e.target?.result as string)); setStep("preview") }
-    reader.readAsText(f)
+    reader.onload = async (e) => {
+      const parsed = parseAndValidateExcel(e.target?.result as ArrayBuffer)
+      setRows(parsed)
+      setStep("validating")
+      try {
+        const serverErrors = await validateClientRows(
+          parsed.map((r) => ({
+            rowNum:        r.rowNum,
+            clientCode:    r.clientCode,
+            accountNumber: r.accountNumber,
+            branchCode:    r.branchCode,
+          }))
+        )
+        // Merge server-side errors into the rows
+        if (Object.keys(serverErrors).length > 0) {
+          setRows(parsed.map((r) =>
+            serverErrors[r.rowNum]
+              ? { ...r, errors: [...r.errors, ...serverErrors[r.rowNum]] }
+              : r
+          ))
+        }
+      } catch {
+        toast.error("Could not run server validation — check your connection.")
+      }
+      setStep("preview")
+    }
+    reader.readAsArrayBuffer(f)
   }
 
   async function handleConfirmUpload() {
@@ -151,7 +198,7 @@ export function UploadClientsBtn() {
     <>
       <Button variant="outline" onClick={() => setOpen(true)}>
         <UploadIcon className="mr-2 size-4" />
-        Import CSV
+        Import Excel
       </Button>
 
       <Dialog
@@ -164,23 +211,30 @@ export function UploadClientsBtn() {
           <DialogHeader className="border-b px-6 py-4">
             <DialogTitle>Import Clients</DialogTitle>
             <DialogDescription>
-              CSV columns (in order):{" "}
+              Excel columns (in order):{" "}
               <span className="font-mono font-medium text-foreground">
-                Client Code · First Name · Last Name · Branch Code · Email · Phone · Scheme Type · Weekly Amount · Account Number · Start Date (DD/MM/YYYY)
+                Client Code · First Name · Last Name · Branch Code · Email · Phone · Address · Account Number · Scheme Type · Weekly Amount · Start Date (DD/MM/YYYY)
               </span>
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-4">
             {/* File picker */}
-            <input ref={inputRef} type="file" accept=".csv,text/csv" className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+            />
             {!file ? (
-              <button onClick={() => inputRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center transition-colors hover:border-muted-foreground/60 hover:bg-muted/30">
+              <button
+                onClick={() => inputRef.current?.click()}
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/30 p-12 text-center transition-colors hover:border-muted-foreground/60 hover:bg-muted/30"
+              >
                 <UploadIcon className="size-10 text-muted-foreground" />
-                <p className="text-sm font-medium">Click to select CSV file</p>
-                <p className="text-xs text-muted-foreground">Client list format (.csv)</p>
+                <p className="text-sm font-medium">Click to select Excel file</p>
+                <p className="text-xs text-muted-foreground">Client list format (.xlsx, .xls)</p>
               </button>
             ) : (
               <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
@@ -188,12 +242,25 @@ export function UploadClientsBtn() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{file.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {step === "idle" ? "Parsing…" : `${rows.length} rows found`}
+                    {step === "idle"       ? "Parsing…"
+                     : step === "validating" ? "Validating against database…"
+                     : `${rows.length} rows found`}
                   </p>
                 </div>
                 {step !== "uploading" && step !== "done" && (
                   <Button variant="ghost" size="sm" onClick={reset}>Change</Button>
                 )}
+              </div>
+            )}
+
+            {/* Validating spinner */}
+            {step === "validating" && (
+              <div className="flex items-center gap-2 rounded-lg border px-4 py-3 text-sm text-muted-foreground">
+                <svg className="size-4 animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                Checking branch codes, duplicate client codes and account numbers…
               </div>
             )}
 
@@ -217,7 +284,7 @@ export function UploadClientsBtn() {
             )}
 
             {/* Full row table */}
-            {(step === "preview" || step === "uploading" || step === "done") && rows.length > 0 && (
+            {(step === "validating" || step === "preview" || step === "uploading" || step === "done") && rows.length > 0 && (
               <div className="overflow-auto rounded-md border text-xs">
                 <table className="w-full">
                   <thead className="sticky top-0 z-10 bg-muted/90 backdrop-blur-sm">
@@ -252,12 +319,16 @@ export function UploadClientsBtn() {
                           <td className={`px-3 py-2 ${!r.firstName ? "text-red-600" : ""}`}>{r.firstName || "—"}</td>
                           <td className={`px-3 py-2 ${!r.lastName ? "text-red-600" : ""}`}>{r.lastName || "—"}</td>
                           <td className={`px-3 py-2 font-mono ${!r.branchCode ? "text-red-600" : ""}`}>{r.branchCode || "—"}</td>
-                          <td className={`px-3 py-2 ${!VALID_SCHEMES.includes(r.schemeType) ? "text-red-600" : ""}`}>{r.schemeType || "—"}</td>
-                          <td className={`px-3 py-2 text-right font-medium ${!r.weeklyAmount || r.weeklyAmount <= 0 ? "text-red-600" : ""}`}>
-                            {r.weeklyAmount ?? <span className="italic text-muted-foreground">0</span>}
+                          <td className={`px-3 py-2 ${r.schemeType && !VALID_SCHEMES.includes(r.schemeType) ? "text-red-600" : ""}`}>
+                            {r.schemeType || "—"}
                           </td>
-                          <td className={`px-3 py-2 font-mono ${!r.accountNumber ? "text-red-600" : ""}`}>{r.accountNumber || "—"}</td>
-                          <td className={`px-3 py-2 ${!DATE_RE.test(r.startDate) ? "text-red-600" : ""}`}>{r.startDate || "—"}</td>
+                          <td className={`px-3 py-2 text-right font-medium ${r.weeklyAmount !== null && r.weeklyAmount <= 0 ? "text-red-600" : ""}`}>
+                            {r.weeklyAmount ?? <span className="italic text-muted-foreground">—</span>}
+                          </td>
+                          <td className="px-3 py-2 font-mono">{r.accountNumber || "—"}</td>
+                          <td className={`px-3 py-2 ${r.startDate && !DATE_RE.test(r.startDate) ? "text-red-600" : ""}`}>
+                            {r.startDate || "—"}
+                          </td>
                           <td className="min-w-[180px] px-3 py-2">
                             {r.errors.length > 0 && (
                               <ul className="space-y-0.5">
@@ -276,7 +347,7 @@ export function UploadClientsBtn() {
             {step === "preview" && rows.length === 0 && (
               <div className="flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-sm dark:border-yellow-800 dark:bg-yellow-950/30">
                 <AlertCircleIcon className="size-4 shrink-0 text-yellow-600" />
-                No data rows found. Check the CSV has the correct 10-column format.
+                No data rows found. Check the Excel file has the correct 11-column format.
               </div>
             )}
 
@@ -301,6 +372,7 @@ export function UploadClientsBtn() {
 
           <DialogFooter className="border-t px-6 py-4">
             <Button variant="outline" onClick={() => setOpen(false)}>Close</Button>
+            {step === "validating" && <Button disabled>Validating…</Button>}
             {step === "preview" && validRows.length > 0 && (
               <Button onClick={handleConfirmUpload}>
                 <UploadIcon className="mr-2 size-4" />

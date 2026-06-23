@@ -1,4 +1,4 @@
-import "dotenv/config"
+import "./env"
 import { db } from "./index"
 import { user, account } from "./schema"
 import { hashPassword } from "better-auth/crypto"

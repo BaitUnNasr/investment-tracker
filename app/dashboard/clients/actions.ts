@@ -12,7 +12,56 @@ import {
 import { eq, count, sum } from "drizzle-orm"
 import { auth } from "@/lib/auth"
 
-type ActionResult = { success: true } | { error: string }
+type ActionResult = { success: true } | { error: string; field?: string }
+
+// ─── Pre-import validation ─────────────────────────────────────────────────
+
+export async function validateClientRows(
+  rows: { rowNum: number; clientCode: string; accountNumber: string; branchCode: string }[]
+): Promise<Record<number, string[]>> {
+  const allBranches      = await db.select({ code: branches.code }).from(branches)
+  const existingClients  = await db.select({ clientCode: clients.clientCode }).from(clients)
+  const existingAccounts = await db.select({ accountNumber: investmentAccounts.accountNumber }).from(investmentAccounts)
+
+  const branchCodes  = new Set(allBranches.map((b) => b.code))
+  const clientCodes  = new Set(existingClients.map((c) => c.clientCode))
+  const accountNums  = new Set(existingAccounts.map((a) => a.accountNumber))
+
+  // Track codes seen within this batch to catch intra-file duplicates
+  const batchClientCodes  = new Map<string, number>()
+  const batchAccountNums  = new Map<string, number>()
+
+  const result: Record<number, string[]> = {}
+
+  for (const row of rows) {
+    const errs: string[] = []
+
+    if (row.branchCode && !branchCodes.has(row.branchCode))
+      errs.push(`Branch "${row.branchCode}" not found`)
+
+    if (row.clientCode) {
+      if (clientCodes.has(row.clientCode))
+        errs.push(`Client code "${row.clientCode}" already exists`)
+      else if (batchClientCodes.has(row.clientCode))
+        errs.push(`Duplicate in file — row ${batchClientCodes.get(row.clientCode)} also uses this code`)
+      else
+        batchClientCodes.set(row.clientCode, row.rowNum)
+    }
+
+    if (row.accountNumber) {
+      if (accountNums.has(row.accountNumber))
+        errs.push(`Account number "${row.accountNumber}" already exists`)
+      else if (batchAccountNums.has(row.accountNumber))
+        errs.push(`Duplicate in file — row ${batchAccountNums.get(row.accountNumber)} also uses this account number`)
+      else
+        batchAccountNums.set(row.accountNumber, row.rowNum)
+    }
+
+    if (errs.length > 0) result[row.rowNum] = errs
+  }
+
+  return result
+}
 
 export async function getClientData() {
   const rows = await db
@@ -119,7 +168,7 @@ export async function createClient(data: {
     .limit(1)
 
   if (duplicate.length > 0) {
-    return { error: `Client code "${data.clientCode}" already exists` }
+    return { error: `Client code "${data.clientCode}" already exists`, field: "clientCode" }
   }
 
   if (data.accountNumber?.trim()) {
@@ -130,7 +179,7 @@ export async function createClient(data: {
       .limit(1)
 
     if (accDuplicate.length > 0) {
-      return { error: `Account number "${data.accountNumber}" already exists` }
+      return { error: `Account number "${data.accountNumber}" already exists`, field: "accountNumber" }
     }
   }
 
@@ -200,7 +249,7 @@ export async function updateClient(
     .limit(1)
 
   if (codeConflict.length > 0 && codeConflict[0].id !== id) {
-    return { error: `Client code "${data.clientCode}" is already in use` }
+    return { error: `Client code "${data.clientCode}" is already in use`, field: "clientCode" }
   }
 
   await db

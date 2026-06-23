@@ -10,25 +10,17 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getNavRows } from "./actions"
 
-// Placeholder NAV data — replace with DB query
-const tefNav = [
-  { date: "07/02/2026", nav: 18.4521, change: +0.12 },
-  { date: "06/02/2026", nav: 18.3401, change: -0.08 },
-  { date: "05/02/2026", nav: 18.4205, change: +0.21 },
-  { date: "04/02/2026", nav: 18.2100, change: +0.15 },
-  { date: "03/02/2026", nav: 18.0600, change: -0.05 },
-]
+export default async function NavDataPage() {
+  const [tefNav, tgfNav] = await Promise.all([
+    getNavRows("TEF"),
+    getNavRows("TGF"),
+  ])
 
-const tgfNav = [
-  { date: "07/02/2026", nav: 24.7830, change: +0.34 },
-  { date: "06/02/2026", nav: 24.4430, change: +0.18 },
-  { date: "05/02/2026", nav: 24.2630, change: -0.11 },
-  { date: "04/02/2026", nav: 24.3730, change: +0.42 },
-  { date: "03/02/2026", nav: 23.9530, change: +0.09 },
-]
+  const latestTef = tefNav[0]
+  const latestTgf = tgfNav[0]
 
-export default function NavDataPage() {
   return (
     <>
       <SiteHeader title="NAV Data" />
@@ -51,33 +43,46 @@ export default function NavDataPage() {
                 <CardDescription>Tata Ethical Fund (TEF)</CardDescription>
                 <Badge variant="outline">35% allocation</Badge>
               </div>
-              <CardTitle className="text-3xl font-mono">
-                ₹{tefNav[0].nav.toFixed(4)}
-              </CardTitle>
+              {latestTef ? (
+                <>
+                  <CardTitle className="text-3xl font-mono">
+                    ₹{latestTef.nav.toFixed(4)}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    As of {latestTef.date} &nbsp;|&nbsp;
+                    <span className={latestTef.change >= 0 ? "text-emerald-600" : "text-red-500"}>
+                      {latestTef.change >= 0 ? "▲" : "▼"} {Math.abs(latestTef.change).toFixed(4)}
+                    </span>
+                  </p>
+                </>
+              ) : (
+                <CardTitle className="text-sm text-muted-foreground">No data uploaded yet</CardTitle>
+              )}
             </CardHeader>
-            <p className="px-6 pb-4 text-sm text-muted-foreground">
-              As of {tefNav[0].date} &nbsp;|&nbsp;
-              <span className={tefNav[0].change >= 0 ? "text-emerald-600" : "text-red-500"}>
-                {tefNav[0].change >= 0 ? "▲" : "▼"} {Math.abs(tefNav[0].change).toFixed(2)}
-              </span>
-            </p>
           </Card>
+
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardDescription>Tata Gold Fund (TGF)</CardDescription>
                 <Badge variant="outline">30% allocation</Badge>
               </div>
-              <CardTitle className="text-3xl font-mono">
-                ₹{tgfNav[0].nav.toFixed(4)}
-              </CardTitle>
+              {latestTgf ? (
+                <>
+                  <CardTitle className="text-3xl font-mono">
+                    ₹{latestTgf.nav.toFixed(4)}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    As of {latestTgf.date} &nbsp;|&nbsp;
+                    <span className={latestTgf.change >= 0 ? "text-emerald-600" : "text-red-500"}>
+                      {latestTgf.change >= 0 ? "▲" : "▼"} {Math.abs(latestTgf.change).toFixed(4)}
+                    </span>
+                  </p>
+                </>
+              ) : (
+                <CardTitle className="text-sm text-muted-foreground">No data uploaded yet</CardTitle>
+              )}
             </CardHeader>
-            <p className="px-6 pb-4 text-sm text-muted-foreground">
-              As of {tgfNav[0].date} &nbsp;|&nbsp;
-              <span className={tgfNav[0].change >= 0 ? "text-emerald-600" : "text-red-500"}>
-                {tgfNav[0].change >= 0 ? "▲" : "▼"} {Math.abs(tgfNav[0].change).toFixed(2)}
-              </span>
-            </p>
           </Card>
         </div>
 

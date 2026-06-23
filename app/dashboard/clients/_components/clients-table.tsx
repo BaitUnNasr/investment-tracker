@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import {
   useReactTable,
   getCoreRowModel,
@@ -133,6 +134,7 @@ export function ClientsTable({
   const [editingClient, setEditingClient]   = useState<ClientData | null>(null)
   const [clientToDelete, setClientToDelete] = useState<ClientData | null>(null)
   const [isPending, startTransition]    = useTransition()
+  const router                          = useRouter()
 
   const columns = useMemo<ColumnDef<ClientData>[]>(() => [
     {
@@ -249,7 +251,7 @@ export function ClientsTable({
       header: () => <div className="text-right pr-2">Actions</div>,
       enableSorting: false,
       cell: ({ row }) => {
-        const locked = row.original.totalInvested > 0
+        const locked = row.original.account !== null || row.original.totalInvested > 0
         return (
           <TooltipProvider>
             <div className="flex items-center justify-end gap-1 pr-2">
@@ -286,8 +288,18 @@ export function ClientsTable({
                     </Button>
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>
-                  {locked ? "Cannot delete — client has investments" : "Delete"}
+                <TooltipContent side="left" className="max-w-60">
+                  {locked ? (
+                    <div className="space-y-1.5">
+                      <p className="font-semibold">Cannot delete this client</p>
+                      <p className="text-xs text-muted-foreground">To delete, complete these steps first:</p>
+                      <ol className="text-xs space-y-1 list-decimal list-inside">
+                        <li>Close or remove the investment account</li>
+                        <li>Ensure no pending transactions remain</li>
+                        <li>Then delete the client</li>
+                      </ol>
+                    </div>
+                  ) : "Delete"}
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -335,6 +347,7 @@ export function ClientsTable({
         toast.error(result.error)
       } else {
         toast.success(`Client "${client.firstName} ${client.lastName}" deleted`)
+        router.refresh()
       }
     })
   }

@@ -64,6 +64,7 @@ export function AddClientDialog({ branches }: { branches: Branch[] }) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
+    mode: "onTouched",
     defaultValues: {
       clientCode: "", firstName: "", lastName: "", branchId: "",
       email: "", phone: "", address: "",
@@ -77,14 +78,23 @@ export function AddClientDialog({ branches }: { branches: Branch[] }) {
   const selectedBranch    = branches.find((b) => b.id === selectedBranchId)
 
   async function onSubmit(values: FormValues) {
-    const result = await createClient(values)
-    if ("error" in result) {
-      toast.error(result.error)
-      return
+    try {
+      const result = await createClient(values)
+      if ("error" in result) {
+        // Map known server errors to the relevant field; fall back to toast
+        if (result.field) {
+          form.setError(result.field as keyof FormValues, { message: result.error })
+        } else {
+          toast.error(result.error)
+        }
+        return
+      }
+      toast.success(`Client "${values.firstName} ${values.lastName}" created`)
+      form.reset()
+      setOpen(false)
+    } catch {
+      toast.error("Something went wrong. Please try again.")
     }
-    toast.success(`Client "${values.firstName} ${values.lastName}" created`)
-    form.reset()
-    setOpen(false)
   }
 
   function handleClose() {

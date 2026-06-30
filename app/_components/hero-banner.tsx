@@ -5,10 +5,17 @@ import { ArrowRight } from "lucide-react"
 
 // ── Hero Banner ───────────────────────────────────────────────────────────────
 const HeroBanner = () => (
-  <div className="min-h-screen flex flex-col bg-background">
+  <div className="relative min-h-screen flex flex-col overflow-hidden bg-background">
+
+    {/* Decorative animated background — purely aesthetic, hidden from a11y tree */}
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <div className="animate-blob absolute -top-24 -left-16 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+      <div className="animate-blob animation-delay-2000 absolute top-1/3 -right-16 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl" />
+      <div className="animate-blob animation-delay-4000 absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-violet-400/20 blur-3xl" />
+    </div>
 
     {/* Hero */}
-    <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 max-w-4xl mx-auto w-full">
+    <main className="relative flex-1 flex flex-col items-center justify-center text-center px-6 py-20 max-w-4xl mx-auto w-full">
       {/* Badge */}
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border text-xs text-muted-foreground mb-8 bg-background">
         <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />

@@ -1,4 +1,4 @@
-import { Geist_Mono, Inter, Open_Sans } from "next/font/google"
+import { Inter, Open_Sans } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -11,7 +11,8 @@ const openSans = Open_Sans({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata = {
   title: "Investment Tracker",
-  description: "",
+  description:
+    "Track investment portfolios, fund allocations, and weekly collections across branches and clients with real-time analytics.",
 }
 
 export default function RootLayout({

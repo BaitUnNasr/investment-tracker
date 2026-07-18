@@ -30,7 +30,7 @@ export default function ClientReportsPage() {
   return (
     <>
       <SiteHeader title="Client Reports" />
-      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+      <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 min-w-0">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold">Client Investment Report</h2>
@@ -44,7 +44,7 @@ export default function ClientReportsPage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Total Corpus</CardDescription>

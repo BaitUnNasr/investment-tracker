@@ -21,7 +21,7 @@ export default async function InvestmentAccountsPage() {
   return (
     <>
       <SiteHeader title="Investment Accounts" />
-      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+      <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 min-w-0">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold">Investment Accounts</h2>
@@ -35,7 +35,7 @@ export default async function InvestmentAccountsPage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 @3xl/main:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">RTD Accounts</CardTitle>

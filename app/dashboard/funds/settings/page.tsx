@@ -65,7 +65,7 @@ export default function FundSettingsPage() {
   return (
     <>
       <SiteHeader title="Fund Allocation Settings" />
-      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+      <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
         <div>
           <h2 className="text-xl font-semibold">Fund Allocation Settings</h2>
           <p className="text-sm text-muted-foreground">

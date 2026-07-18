@@ -23,7 +23,7 @@ export default async function ClientsPage() {
   return (
     <>
       <SiteHeader title="Clients" />
-      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 min-w-0">
+      <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 min-w-0">
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -40,7 +40,7 @@ export default async function ClientsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">

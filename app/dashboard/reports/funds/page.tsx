@@ -31,7 +31,7 @@ export default function FundReportsPage() {
   return (
     <>
       <SiteHeader title="Fund Reports" />
-      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+      <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 min-w-0">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold">Fund Unit Allotment Report</h2>
